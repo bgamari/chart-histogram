@@ -52,4 +52,4 @@ Library
   
 Executable Test
   Main-is:             Test.hs
-
+  Build-depends:       Chart-gtk, data-accessor
