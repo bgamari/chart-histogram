@@ -48,7 +48,7 @@ Library
   Exposed-modules:     Numeric.Histogram, Graphics.Rendering.Chart.Plot.Histogram
   
   -- Packages needed in order to build this package.
-  Build-depends:       base, vector, Chart, data-accessor
+  Build-depends:       base, vector, Chart, data-accessor, data-accessor-template
   
 Executable Test
   Main-is:             Test.hs

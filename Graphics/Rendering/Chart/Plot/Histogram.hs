@@ -5,6 +5,7 @@ module Graphics.Rendering.Chart.Plot.Histogram ( PlotHist (..)
                                                , plotHist
                                                ) where
 
+import Data.Accessor.Template
 import Numeric.Histogram
 import Data.List (transpose)
 import Graphics.Rendering.Chart.Types
@@ -43,3 +44,6 @@ histToBars hist =
 
 plotHist :: RealFrac x => PlotHist x -> Plot x Int
 plotHist = plotBars . histToBars
+
+$( deriveAccessors ''PlotHist )
+  
