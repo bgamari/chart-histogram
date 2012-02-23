@@ -8,9 +8,9 @@ import Graphics.Rendering.Chart.Plot.Histogram
 values = [[1,1,2,3, 8,8,8,8]] :: [[Double]]
 
 chart = layout
-        where hist = defaultPlotHist { plot_hist_values_ = values
-                                     , plot_hist_range_ = Just (0, 10)
-                                     }
+        where hist = plot_hist_values  ^= values
+                     $ plot_hist_range ^= Just (0, 10)
+                     $ defaultPlotHist
               layout = layout1_title ^= "Hello World"
                      $ layout1_plots ^= [Left (plotHist hist)]
                      $ defaultLayout1
