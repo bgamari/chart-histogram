@@ -3,6 +3,11 @@
 module Graphics.Rendering.Chart.Plot.Histogram ( PlotHist (..)
                                                , defaultPlotHist
                                                , plotHist
+                                                 
+                                               , plot_hist_item_styles
+                                               , plot_hist_bins
+                                               , plot_hist_values
+                                               , plot_hist_range
                                                ) where
 
 import Data.Accessor.Template
