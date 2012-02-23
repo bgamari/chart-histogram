@@ -8,7 +8,7 @@ module Graphics.Rendering.Chart.Plot.Histogram ( PlotHist (..)
 import Numeric.Histogram
 import Data.List (transpose)
 import Graphics.Rendering.Chart.Types
-import Graphics.Rendering.Chart.Plot.Types (Plot)
+import Graphics.Rendering.Chart.Plot.Types
 import Graphics.Rendering.Chart.Plot.Bars
 
 data PlotHist x = PlotHist { plot_hist_item_styles_          :: [ (CairoFillStyle, Maybe CairoLineStyle) ]
