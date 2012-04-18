@@ -44,7 +44,7 @@ histToBars hist =
               (a,b) = maybe (dmin,dmax) id $ plot_hist_range_ hist
               n = plot_hist_bins_ hist
               bounds = binBounds a b n
-              counts = map (map snd . histValues a b n) values
+              counts = map (map snd . histWithBins bounds) values
               values' = zip (map fst bounds) (transpose counts)
 
 plotHist :: RealFrac x => PlotHist x -> Plot x Int
