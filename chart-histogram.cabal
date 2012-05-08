@@ -45,11 +45,15 @@ Cabal-version:       >=1.2
 
 Library
   -- Modules exported by the library.
-  Exposed-modules:     Numeric.Histogram, Graphics.Rendering.Chart.Plot.Histogram
+  Exposed-modules:     Numeric.Histogram, Graphics.Rendering.Chart.Plot.Histogram, Graphics.Rendering.Chart.Plot.HeatMap
   
   -- Packages needed in order to build this package.
-  Build-depends:       base, vector, Chart, data-accessor, data-accessor-template
+  Build-depends:       base, vector, Chart, data-accessor, data-accessor-template, colour, cairo
   
 Executable Test
   Main-is:             Test.hs
+  Build-depends:       Chart-gtk, data-accessor
+
+Executable TestHeatMap
+  Main-is:             TestHeatMap.hs
   Build-depends:       Chart-gtk, data-accessor
