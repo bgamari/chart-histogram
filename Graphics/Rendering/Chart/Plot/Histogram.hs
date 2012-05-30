@@ -3,6 +3,7 @@
 module Graphics.Rendering.Chart.Plot.Histogram ( PlotHist (..)
                                                , defaultPlotHist
                                                , plotHist
+                                               , plotFloatHist
                                                , plotNormedHist
                                                  
                                                , plot_hist_item_styles
@@ -54,11 +55,17 @@ histToBars' normalizeFunc hist =
 histToBars :: RealFrac x => PlotHist x -> PlotBars x Int
 histToBars = histToBars' (const id)
 
+histToFloatBars :: RealFrac x => PlotHist x -> PlotBars x Double
+histToFloatBars = histToBars' (const realToFrac)
+
 histToNormedBars :: RealFrac x => PlotHist x -> PlotBars x Double
 histToNormedBars = histToBars' (\norm n->realToFrac n / norm)
 
 plotHist :: RealFrac x => PlotHist x -> Plot x Int
 plotHist = plotBars . histToBars
+
+plotFloatHist :: RealFrac x => PlotHist x -> Plot x Double
+plotFloatHist = plotBars . histToFloatBars
 
 plotNormedHist :: RealFrac x => PlotHist x -> Plot x Double
 plotNormedHist = plotBars . histToNormedBars
