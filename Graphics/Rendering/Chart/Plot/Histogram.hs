@@ -7,6 +7,8 @@ module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
                                                , histToBarsPlot
                                                , histToFloatBarsPlot
                                                , histToNormedBarsPlot
+                                                 -- * Line plots
+                                               , histToLinesPlot
                                                  -- * Accessors
                                                , plot_hist_item_styles
                                                , plot_hist_bins
@@ -21,6 +23,7 @@ import Graphics.Rendering.Chart.Types
 import Graphics.Rendering.Chart.Axis.Types
 import Graphics.Rendering.Chart.Plot.Types
 import Graphics.Rendering.Chart.Plot.Bars
+import Graphics.Rendering.Chart.Plot.Lines
 
 data PlotHist x = PlotHist { plot_hist_item_styles_          :: [ (CairoFillStyle, Maybe CairoLineStyle) ]
                            , plot_hist_bins_                 :: Int
@@ -73,6 +76,27 @@ histToFloatBarsPlot = plotBars . histToBars (const realToFrac)
 -- density along the Y axis
 histToNormedBarsPlot :: RealFrac x => PlotHist x -> Plot x Double
 histToNormedBarsPlot = plotBars . histToBars (\norm n->realToFrac n / norm)
+
+histToLines :: (RealFrac x, PlotValue a) => (Double -> Int -> a) -> PlotHist x -> Plot x a
+histToLines normalizeFunc hist =
+    toPlot
+    $ defaultPlotLines { plot_lines_values_ = values }
+    where (bounds,counts) = unzip $ histToBins normalizeFunc hist
+          values = map (\c->concat $ zipWith (\(a,b) n->[(a,n), (b,n)]) bounds c)
+                   $ transpose counts
+          
+-- | Produce a line plot from a histogram with normalized probability density
+histToLinesPlot :: RealFrac x => PlotHist x -> Plot x Int
+histToLinesPlot = histToLines (const id)
+
+-- | Produce a bar plot from a histogram with counts along the Y axis
+histToFloatLinesPlot :: RealFrac x => PlotHist x -> Plot x Double
+histToFloatLinesPlot = histToLines (const realToFrac)
+
+-- | Produce a bar plot from a histogram with normalized probability
+-- density along the Y axis
+histToNormedLinesPlot :: RealFrac x => PlotHist x -> Plot x Double
+histToNormedLinesPlot = histToLines (\norm n->realToFrac n / norm)
 
 $( deriveAccessors ''PlotHist )
   
