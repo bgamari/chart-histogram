@@ -12,7 +12,7 @@ chart = layout
                      $ plot_hist_range ^= Just (0, 10)
                      $ defaultPlotHist
               layout = layout1_title ^= "Hello World"
-                     $ layout1_plots ^= [Left (plotHist hist)]
+                     $ layout1_plots ^= [Left (histToBarsPlot hist)]
                      $ defaultLayout1
 
 main = do renderableToWindow (toRenderable chart) 640 480
