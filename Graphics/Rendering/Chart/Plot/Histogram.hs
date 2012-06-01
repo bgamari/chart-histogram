@@ -1,11 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Graphics.Rendering.Chart.Plot.Histogram ( PlotHist (..)
+module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
+                                                 PlotHist (..)
                                                , defaultPlotHist
+                                                 -- * Bar plots
                                                , histToBarsPlot
                                                , histToFloatBarsPlot
                                                , histToNormedBarsPlot
-                                                 
+                                                 -- * Accessors
                                                , plot_hist_item_styles
                                                , plot_hist_bins
                                                , plot_hist_values
