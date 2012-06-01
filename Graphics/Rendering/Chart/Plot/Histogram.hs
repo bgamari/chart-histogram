@@ -43,18 +43,18 @@ defaultPlotHist = PlotHist { plot_hist_item_styles_ = plot_bars_item_styles_ (de
                            , plot_hist_range_    = Nothing
                            }
         
-histToBins :: (RealFrac x, Num a, PlotValue a) => (Double -> Int -> a) -> PlotHist x -> [((x,x), [a])]
-histToBins normalizeFunc hist = zip bounds (transpose counts)
+histToBins :: (RealFrac x, PlotValue a) => (Double -> Int -> a) -> PlotHist x -> [[((x,x), a)]]
+histToBins normalizeFunc hist =
+    map (\xs->filter_zeros $ zip bounds (counts xs))
+    $ plot_hist_values_ hist
     where n = plot_hist_bins_ hist
           (a,b) = realHistRange hist
           dx = realToFrac (b-a) / realToFrac n
           bounds = binBounds a b n
-          no_zeros | plot_hist_no_zeros_ hist  = (+1)
-                   | otherwise                 = id
+          filter_zeros | plot_hist_no_zeros_ hist  = filter (\(b,c)->c>fromValue 0)
+                       | otherwise                 = id
           norm xs = dx * realToFrac (length xs)
-          counts = map (\xs->map (no_zeros . normalizeFunc (norm xs) . snd)
-                             $ histWithBins bounds xs
-                       ) $ plot_hist_values_ hist
+          counts xs = map (normalizeFunc (norm xs) . snd) $ histWithBins bounds xs
 
 -- TODO: Determine more aesthetically pleasing range
 realHistRange :: (RealFrac x) => PlotHist x -> (x,x)
@@ -63,15 +63,16 @@ realHistRange hist = maybe (dmin,dmax) id $ plot_hist_range_ hist
           dmin = minimum $ map minimum values
           dmax = maximum $ map maximum values
 
-histToBars :: (RealFrac x, Num a, BarsPlotValue a) => (Double -> Int -> a) -> PlotHist x -> PlotBars x a
+histToBars :: (RealFrac x, BarsPlotValue a) => (Double -> Int -> a) -> PlotHist x -> PlotBars x a
 histToBars normalizeFunc hist =
     defaultPlotBars { plot_bars_item_styles_ = plot_hist_item_styles_ hist
-                    , plot_bars_values_ = map (\((a,b),c)->(a,c))
-                                          $ histToBins normalizeFunc hist
+                    , plot_bars_values_ = zip bounds values
                     , plot_bars_spacing_ = BarsFixGap 0 0
                     , plot_bars_alignment_ = BarsLeft
                     , plot_bars_style_ = BarsStacked
                     }
+    where (bounds, values) = error "TODO" -- unzip $ transpose $ histToBins normalizeFunc hist
+          
 
 -- | Produce a bar plot from a histogram with counts along the Y axis
 histToBarsPlot :: RealFrac x => PlotHist x -> Plot x Int
@@ -86,13 +87,13 @@ histToFloatBarsPlot = plotBars . histToBars (const realToFrac)
 histToNormedBarsPlot :: RealFrac x => PlotHist x -> Plot x Double
 histToNormedBarsPlot = plotBars . histToBars (\norm n->realToFrac n / norm)
 
-histToLines :: (RealFrac x, Num a, PlotValue a) => (Double -> Int -> a) -> PlotHist x -> Plot x a
+histToLines :: (RealFrac x, PlotValue a) => (Double -> Int -> a) -> PlotHist x -> Plot x a
 histToLines normalizeFunc hist =
     toPlot
-    $ defaultPlotLines { plot_lines_values_ = values }
-    where (bounds,counts) = unzip $ histToBins normalizeFunc hist
-          values = map (\c->concat $ zipWith (\(a,b) n->[(a,n), (b,n)]) bounds c)
-                   $ transpose counts
+    $ defaultPlotLines { plot_lines_values_ = values
+                       }
+    where values = map (concatMap (\((a,b),n)->[(a,n), (b,n)]))
+                   $ histToBins normalizeFunc hist
           
 -- | Produce a line plot from a histogram with normalized probability density
 histToLinesPlot :: RealFrac x => PlotHist x -> Plot x Int
