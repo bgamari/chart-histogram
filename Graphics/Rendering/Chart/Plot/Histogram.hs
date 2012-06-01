@@ -9,6 +9,8 @@ module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
                                                , histToNormedBarsPlot
                                                  -- * Line plots
                                                , histToLinesPlot
+                                               , histToFloatLinesPlot
+                                               , histToNormedLinesPlot
                                                  -- * Accessors
                                                , plot_hist_item_styles
                                                , plot_hist_bins
@@ -48,6 +50,7 @@ histToBins normalizeFunc hist = zip bounds (transpose counts)
                              $ histWithBins bounds xs
                        ) $ plot_hist_values_ hist
 
+-- TODO: Determine more aesthetically pleasing range
 realHistRange :: (RealFrac x) => PlotHist x -> (x,x)
 realHistRange hist = maybe (dmin,dmax) id $ plot_hist_range_ hist
     where values = plot_hist_values_ hist
