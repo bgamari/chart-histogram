@@ -43,7 +43,8 @@ defaultPlotHist = PlotHist { plot_hist_item_styles_ = plot_bars_item_styles_ (de
                            , plot_hist_range_    = Nothing
                            }
         
-histToBins :: (RealFrac x, PlotValue a) => (Double -> Int -> a) -> PlotHist x -> [[((x,x), a)]]
+histToBins :: (RealFrac x, PlotValue a)
+           => (Double -> Int -> a) -> PlotHist x -> [[((x,x), a)]]
 histToBins normalizeFunc hist =
     map (\xs->filter_zeros $ zip bounds (counts xs))
     $ plot_hist_values_ hist
@@ -54,7 +55,8 @@ histToBins normalizeFunc hist =
           filter_zeros | plot_hist_no_zeros_ hist  = filter (\(b,c)->c>fromValue 0)
                        | otherwise                 = id
           norm xs = dx * realToFrac (length xs)
-          counts xs = map (normalizeFunc (norm xs) . snd) $ histWithBins bounds xs
+          counts xs = map (normalizeFunc (norm xs) . snd)
+                      $ histWithBins bounds (zip (repeat 1) xs)
 
 -- TODO: Determine more aesthetically pleasing range
 realHistRange :: (RealFrac x) => PlotHist x -> (x,x)
