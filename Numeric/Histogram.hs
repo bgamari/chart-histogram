@@ -28,6 +28,7 @@ histValues a b n = histWithBins (binBounds a b n) . zip (repeat 1)
 histWeightedValues :: RealFrac a => a -> a -> Int -> [(Double,a)] -> [(Range a, Double)]
 histWeightedValues a b n = histWithBins (binBounds a b n)
 
+-- | 'histWithBins bins xs' is the histogram of weighted values 'xs' with 'bins'
 histWithBins :: (Num w, RealFrac a) => [Range a] -> [(w, a)] -> [(Range a, w)]
 histWithBins bins xs =
         let testBin :: RealFrac a => a -> Range a -> Bool
