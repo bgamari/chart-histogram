@@ -1,3 +1,5 @@
+{-# LANGUAGE PatternGuards #-}                
+
 module Numeric.Histogram ( Range
                          , binBounds
                          , histValues
@@ -21,27 +23,27 @@ binBounds a b n = map (\i->(lbound i, lbound (i+1))) [0..n]
 -- | 'histValues a b n vs' returns the bins for the histogram of
 -- 'vs' on the range from 'a' to 'b' with 'n' bins
 histValues :: RealFrac a => a -> a -> Int -> [a] -> [(Range a, Int)]
-histValues a b n = histWithBins (binBounds a b n) . zip (repeat 1)
+histValues a b n = histWithBins (V.fromList $ binBounds a b n) . zip (repeat 1)
 
 -- | 'histValues a b n vs' returns the bins for the weighted histogram of
 -- 'vs' on the range from 'a' to 'b' with 'n' bins
 histWeightedValues :: RealFrac a => a -> a -> Int -> [(Double,a)] -> [(Range a, Double)]
-histWeightedValues a b n = histWithBins (binBounds a b n)
+histWeightedValues a b n = histWithBins (V.fromList $ binBounds a b n)
 
 -- | 'histWithBins bins xs' is the histogram of weighted values 'xs' with 'bins'
-histWithBins :: (Num w, RealFrac a) => [Range a] -> [(w, a)] -> [(Range a, w)]
+histWithBins :: (Num w, RealFrac a) => V.Vector (Range a) -> [(w, a)] -> [(Range a, w)]
 histWithBins bins xs =
         let testBin :: RealFrac a => a -> Range a -> Bool
             testBin x (a,b) = x >= a && x < b
 
-            -- f :: RealFrac a => MV.STVector () Int -> a -> ST () (MV.STVector () Int)
-            f bs (w,x) = case dropWhile (not . testBin x . snd) $ zip [0..] bins of
-                              [] -> return bs
-                              (idx,bounds):_  -> do n <- MV.read bs idx
-                                                    MV.write bs idx $! n+w
-                                                    return bs
+            -- f :: RealFrac a => MV.STVector () Int -> a -> ST () ()
+            f bs (w,x) = case V.dropWhile (not . testBin x . snd) $ V.indexed bins of
+                              v | V.null v  -> return ()
+                              v | (idx,bounds) <- V.head v  -> do
+                                  n <- MV.read bs idx
+                                  MV.write bs idx $! n+w
 
-            counts = runST $ do b <- MV.replicate (length bins) 0
-                                b' <- foldM f b xs
-                                (return . V.toList) =<< V.freeze b'
-        in zip bins counts
+            counts = runST $ do b <- MV.replicate (V.length bins) 0
+                                mapM_ (f b) xs
+                                (return . V.toList) =<< V.freeze b
+        in zip (V.toList bins) counts

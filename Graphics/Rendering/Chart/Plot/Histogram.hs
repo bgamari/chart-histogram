@@ -19,14 +19,17 @@ module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
                                                , plot_hist_no_zeros
                                                ) where
 
-import Data.Accessor.Template
-import Numeric.Histogram
 import Data.List (transpose)
+import qualified Data.Vector as V
+
+import Data.Accessor.Template
 import Graphics.Rendering.Chart.Types
 import Graphics.Rendering.Chart.Axis.Types
 import Graphics.Rendering.Chart.Plot.Types
 import Graphics.Rendering.Chart.Plot.Bars
 import Graphics.Rendering.Chart.Plot.Lines
+
+import Numeric.Histogram
 
 data PlotHist x = PlotHist { plot_hist_item_styles_          :: [ (CairoFillStyle, Maybe CairoLineStyle) ]
                            , plot_hist_bins_                 :: Int
@@ -56,7 +59,7 @@ histToBins normalizeFunc hist =
                        | otherwise                 = id
           norm xs = dx * realToFrac (length xs)
           counts xs = map (normalizeFunc (norm xs) . snd)
-                      $ histWithBins bounds (zip (repeat 1) xs)
+                      $ histWithBins (V.fromList bounds) (zip (repeat 1) xs)
 
 -- TODO: Determine more aesthetically pleasing range
 realHistRange :: (RealFrac x) => PlotHist x -> (x,x)
