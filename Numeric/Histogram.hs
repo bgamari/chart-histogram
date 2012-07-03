@@ -34,11 +34,11 @@ histWithBins bins xs =
         let testBin :: RealFrac a => a -> Range a -> Bool
             testBin x (a,b) = x >= a && x < b
 
-            --f :: RealFrac a => MV.STVector () Int -> a -> ST () (MV.STVector () Int)
+            -- f :: RealFrac a => MV.STVector () Int -> a -> ST () (MV.STVector () Int)
             f bs (w,x) = case dropWhile (not . testBin x . snd) $ zip [0..] bins of
                               [] -> return bs
                               (idx,bounds):_  -> do n <- MV.read bs idx
-                                                    MV.write bs idx (n+w)
+                                                    MV.write bs idx $! n+w
                                                     return bs
 
             counts = runST $ do b <- MV.replicate (length bins) 0
