@@ -88,16 +88,18 @@ buildHistPath bins = (x1,fromValue 0):f bins
           f (((x1,x2),y):bins)  = (x1,y):(x2,y):f bins
     
 renderPlotHist :: (RealFrac x, PlotValue y) => PlotHist x y -> PointMapFn x y -> CRender ()
-renderPlotHist p pmap = preserveCState $ do
-    setFillStyle (plot_hist_fill_style_ p)
-    fillPath $ map (mapXY pmap) $ buildHistPath bins
-    setLineStyle (plot_hist_line_style_ p)
-    when (plot_hist_drop_lines_ p) $
-        mapM_ (\((x1,x2), y)->drawLines (mapXY pmap) [(x1,fromValue 0), (x1,y)]) $ tail bins
-    drawLines (mapXY pmap) $ buildHistPath bins
-  where
-    drawLines mapfn pts = strokePath (map mapfn pts)
-    bins = histToBins p
+renderPlotHist p pmap 
+    | null bins = return ()
+    | otherwise = preserveCState $ do
+        setFillStyle (plot_hist_fill_style_ p)
+        fillPath $ map (mapXY pmap) $ buildHistPath bins
+        setLineStyle (plot_hist_line_style_ p)
+        when (plot_hist_drop_lines_ p) $
+            mapM_ (\((x1,x2), y)->drawLines (mapXY pmap) [(x1,fromValue 0), (x1,y)])
+            $ tail bins
+        drawLines (mapXY pmap) $ buildHistPath bins
+    where drawLines mapfn pts = strokePath (map mapfn pts)
+          bins = histToBins p
 
 renderPlotLegendHist :: PlotHist x y -> Rect -> CRender ()
 renderPlotLegendHist p r@(Rect p1 p2) = preserveCState $ do
