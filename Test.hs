@@ -4,8 +4,9 @@ import Data.Accessor
 import Graphics.Rendering.Chart
 import Graphics.Rendering.Chart.Gtk
 import Graphics.Rendering.Chart.Plot.Histogram
+import qualified Data.Vector as V
 
-values = [1,1,2,3, 8,8,8,8, 10] :: [Double]
+values = V.fromList [1,1,2,3, 8,8,8,8, 10] :: V.Vector Double
 
 chart = layout
         where hist = plot_hist_values  ^= values

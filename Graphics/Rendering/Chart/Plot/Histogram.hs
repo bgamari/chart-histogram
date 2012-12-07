@@ -35,7 +35,7 @@ import Numeric.Histogram
 
 data PlotHist x y = PlotHist { plot_hist_title_                :: String
                              , plot_hist_bins_                 :: Int
-                             , plot_hist_values_               :: [x]
+                             , plot_hist_values_               :: V.Vector x
                              , plot_hist_no_zeros_             :: Bool
                              , plot_hist_range_                :: Maybe (x,x)
                              , plot_hist_drop_lines_           :: Bool
@@ -47,7 +47,7 @@ data PlotHist x y = PlotHist { plot_hist_title_                :: String
 defaultPlotHist :: PlotHist x Int
 defaultPlotHist = PlotHist { plot_hist_bins_        = 20
                            , plot_hist_title_       = ""
-                           , plot_hist_values_      = []
+                           , plot_hist_values_      = V.empty
                            , plot_hist_no_zeros_    = False
                            , plot_hist_range_       = Nothing
                            , plot_hist_drop_lines_  = False
@@ -107,7 +107,7 @@ renderPlotLegendHist p r@(Rect p1 p2) = preserveCState $ do
 
 histToBins :: (RealFrac x, PlotValue y) => PlotHist x y -> [((x,x), y)]
 histToBins hist =
-    filter_zeros $ zip bounds $ counts
+    filter_zeros $ zip bounds $ V.toList counts
     where n = plot_hist_bins_ hist
           (a,b) = realHistRange hist
           dx = realToFrac (b-a) / realToFrac n
@@ -115,17 +115,17 @@ histToBins hist =
           values = plot_hist_values_ hist
           filter_zeros | plot_hist_no_zeros_ hist  = filter (\(b,c)->c>fromValue 0)
                        | otherwise                 = id
-          norm = dx * realToFrac (length values)
+          norm = dx * realToFrac (V.length values)
           normalize = plot_hist_norm_func_ hist $ norm
-          counts = map (normalize . snd)
-                   $ histWithBins (V.fromList bounds) (zip (repeat 1) values)
+          counts = V.map (normalize . snd)
+                   $ histWithBins (V.fromList bounds) (zip (repeat 1) $ V.toList values)
 
 -- TODO: Determine more aesthetically pleasing range
 realHistRange :: (RealFrac x) => PlotHist x y -> (x,x)
 realHistRange hist = maybe (dmin,dmax) id $ plot_hist_range_ hist
     where values = plot_hist_values_ hist
-          dmin = minimum values
-          dmax = maximum values
+          dmin = V.minimum values
+          dmax = V.maximum values
 
 $( deriveAccessors ''PlotHist )
   
