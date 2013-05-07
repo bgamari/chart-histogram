@@ -88,16 +88,18 @@ buildHistPath bins = (x1,fromValue 0):f bins
           f (((x1,x2),y):bins)  = (x1,y):(x2,y):f bins
 
 renderPlotHist :: (RealFrac x, PlotValue y) => PlotHist x y -> PointMapFn x y -> CRender ()
-renderPlotHist p pmap = preserveCState $ do
-    setFillStyle (_plot_hist_fill_style p)
-    fillPath $ map (mapXY pmap) $ buildHistPath bins
-    setLineStyle (_plot_hist_line_style p)
-    when (_plot_hist_drop_lines p) $
-        mapM_ (\((x1,x2), y)->drawLines (mapXY pmap) [(x1,fromValue 0), (x1,y)]) $ tail bins
-    drawLines (mapXY pmap) $ buildHistPath bins
-  where
-    drawLines mapfn pts = strokePath (map mapfn pts)
-    bins = histToBins p
+renderPlotHist p pmap
+    | null bins = return ()
+    | otherwise = preserveCState $ do
+        setFillStyle (_plot_hist_fill_style p)
+        fillPath $ map (mapXY pmap) $ buildHistPath bins
+        setLineStyle (_plot_hist_line_style p)
+        when (_plot_hist_drop_lines p) $
+            mapM_ (\((x1,x2), y)->drawLines (mapXY pmap) [(x1,fromValue 0), (x1,y)])
+            $ tail bins
+        drawLines (mapXY pmap) $ buildHistPath bins
+    where drawLines mapfn pts = strokePath (map mapfn pts)
+          bins = histToBins p
 
 renderPlotLegendHist :: PlotHist x y -> Rect -> CRender ()
 renderPlotLegendHist p r@(Rect p1 p2) = preserveCState $ do
@@ -107,7 +109,7 @@ renderPlotLegendHist p r@(Rect p1 p2) = preserveCState $ do
 
 histToBins :: (RealFrac x, PlotValue y) => PlotHist x y -> [((x,x), y)]
 histToBins hist =
-    filter_zeros $ zip bounds $ V.toList counts
+    filter_zeros $ zip bounds $ counts
     where n = _plot_hist_bins hist
           (a,b) = realHistRange hist
           dx = realToFrac (b-a) / realToFrac n
@@ -117,7 +119,7 @@ histToBins hist =
                        | otherwise                 = id
           norm = dx * realToFrac (V.length values)
           normalize = _plot_hist_norm_func hist $ norm
-          counts = V.map (normalize . snd)
+          counts = V.toList $ V.map (normalize . snd)
                    $ histWithBins (V.fromList bounds) (zip (repeat 1) $ V.toList values)
 
 -- TODO: Determine more aesthetically pleasing range
