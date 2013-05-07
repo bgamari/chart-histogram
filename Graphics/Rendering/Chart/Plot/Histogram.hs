@@ -15,6 +15,7 @@ module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
                                                , plot_hist_drop_lines
                                                , plot_hist_line_style
                                                , plot_hist_fill_style
+                                               , plot_hist_norm_func
                                                ) where
 
 import Control.Monad (when)       
