@@ -13,7 +13,7 @@ Version:             0.2
 Synopsis:            Easily render histograms with Chart
 
 -- A longer description of the package.
--- Description:         
+-- Description:
 
 -- The license under which the package is released.
 License:             BSD3
@@ -29,7 +29,7 @@ Author:              Ben Gamari
 Maintainer:          bgamari.foss@gmail.com
 
 -- A copyright notice.
--- Copyright:           
+-- Copyright:
 
 Category:            Graphics
 
@@ -37,7 +37,7 @@ Build-type:          Simple
 
 -- Extra files to be distributed with the package, such as examples or
 -- a README.
--- Extra-source-files:  
+-- Extra-source-files:
 
 -- Constraint on the version of Cabal needed to build this package.
 Cabal-version:       >=1.2
@@ -46,10 +46,10 @@ Cabal-version:       >=1.2
 Library
   -- Modules exported by the library.
   Exposed-modules:     Numeric.Histogram, Graphics.Rendering.Chart.Plot.Histogram
-  
+
   -- Packages needed in order to build this package.
-  Build-depends:       base, vector, Chart, data-accessor, data-accessor-template, colour, cairo
-  
+  Build-depends:       base, vector, Chart >= 1.0, lens, colour, cairo
+
 Executable Test
   Main-is:             Test.hs
-  Build-depends:       Chart-gtk, data-accessor
+  Build-depends:       Chart-gtk >= 1.0, lens

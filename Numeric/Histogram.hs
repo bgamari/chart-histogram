@@ -22,16 +22,16 @@ binBounds a b n = map (\i->(lbound i, lbound (i+1))) [0..n]
 
 -- | 'histValues a b n vs' returns the bins for the histogram of
 -- 'vs' on the range from 'a' to 'b' with 'n' bins
-histValues :: RealFrac a => a -> a -> Int -> [a] -> [(Range a, Int)]
+histValues :: RealFrac a => a -> a -> Int -> [a] -> V.Vector (Range a, Int)
 histValues a b n = histWithBins (V.fromList $ binBounds a b n) . zip (repeat 1)
 
 -- | 'histValues a b n vs' returns the bins for the weighted histogram of
 -- 'vs' on the range from 'a' to 'b' with 'n' bins
-histWeightedValues :: RealFrac a => a -> a -> Int -> [(Double,a)] -> [(Range a, Double)]
+histWeightedValues :: RealFrac a => a -> a -> Int -> [(Double,a)] -> V.Vector (Range a, Double)
 histWeightedValues a b n = histWithBins (V.fromList $ binBounds a b n)
 
 -- | 'histWithBins bins xs' is the histogram of weighted values 'xs' with 'bins'
-histWithBins :: (Num w, RealFrac a) => V.Vector (Range a) -> [(w, a)] -> [(Range a, w)]
+histWithBins :: (Num w, RealFrac a) => V.Vector (Range a) -> [(w, a)] -> V.Vector (Range a, w)
 histWithBins bins xs =
         let testBin :: RealFrac a => a -> Range a -> Bool
             testBin x (a,b) = x >= a && x < b
@@ -45,5 +45,5 @@ histWithBins bins xs =
 
             counts = runST $ do b <- MV.replicate (V.length bins) 0
                                 mapM_ (f b) xs
-                                (return . V.toList) =<< V.freeze b
-        in zip (V.toList bins) counts
+                                V.freeze b
+        in V.zip bins counts
