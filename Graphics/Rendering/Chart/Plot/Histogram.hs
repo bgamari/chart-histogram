@@ -125,7 +125,9 @@ histToBins hist =
 
 -- TODO: Determine more aesthetically pleasing range
 realHistRange :: (RealFrac x) => PlotHist x y -> (x,x)
-realHistRange hist = maybe (dmin,dmax) id $ _plot_hist_range hist
+realHistRange hist
+    | V.null values = (0,0)
+    | otherwise     = maybe (dmin,dmax) id $ _plot_hist_range hist
     where values = _plot_hist_values hist
           dmin = V.minimum values
           dmax = V.maximum values
