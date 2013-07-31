@@ -20,6 +20,7 @@ module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
 
 import Control.Monad (when)
 import Data.List (transpose)
+import Data.Maybe (fromMaybe)
 import qualified Data.Vector as V
 
 import Control.Lens
@@ -125,11 +126,10 @@ histToBins hist =
 
 -- TODO: Determine more aesthetically pleasing range
 realHistRange :: (RealFrac x) => PlotHist x y -> (x,x)
-realHistRange hist
-    | V.null values = (0,0)
-    | otherwise     = maybe (dmin,dmax) id $ _plot_hist_range hist
+realHistRange hist = fromMaybe range $ _plot_hist_range hist
     where values = _plot_hist_values hist
-          dmin = V.minimum values
-          dmax = V.maximum values
+          range = if V.null values
+                    then (0,0)
+                    else (V.minimum values, V.maximum values)
 
 $( makeLenses ''PlotHist )
