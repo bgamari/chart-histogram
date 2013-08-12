@@ -1,22 +1,23 @@
 {-# LANGUAGE TemplateHaskell, FlexibleInstances #-}
 
-module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
-                                                 PlotHist
-                                               , histToPlot
-                                               , defaultPlotHist
-                                               , defaultFloatPlotHist
-                                               , defaultNormedPlotHist
-                                                 -- * Accessors
-                                               , plot_hist_title
-                                               , plot_hist_bins
-                                               , plot_hist_values
-                                               , plot_hist_no_zeros
-                                               , plot_hist_range
-                                               , plot_hist_drop_lines
-                                               , plot_hist_line_style
-                                               , plot_hist_fill_style
-                                               , plot_hist_norm_func
-                                               ) where
+module Graphics.Rendering.Chart.Plot.Histogram
+  ( -- * Histograms
+    PlotHist
+  , histToPlot
+  , defaultPlotHist
+  , defaultFloatPlotHist
+  , defaultNormedPlotHist
+    -- * Accessors
+  , plot_hist_title
+  , plot_hist_bins
+  , plot_hist_values
+  , plot_hist_no_zeros
+  , plot_hist_range
+  , plot_hist_drop_lines
+  , plot_hist_line_style
+  , plot_hist_fill_style
+  , plot_hist_norm_func
+  ) where
 
 import Control.Monad (when)
 import Data.Monoid
