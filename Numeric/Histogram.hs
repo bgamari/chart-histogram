@@ -10,7 +10,6 @@ module Numeric.Histogram ( Range
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as MV
 import Control.Monad.ST
-import Control.Monad (foldM)
 
 type Range a = (a,a)
 
