@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, FlexibleInstances #-}
 
 module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
                                                  PlotHist
@@ -19,15 +19,15 @@ module Graphics.Rendering.Chart.Plot.Histogram ( -- * Histograms
                                                ) where
 
 import Control.Monad (when)
+import Data.Monoid
 import Data.List (transpose)
 import Data.Maybe (fromMaybe)
+import qualified Data.Foldable as F
 import qualified Data.Vector as V
 
 import Control.Lens
-import Graphics.Rendering.Chart.Types
-import Graphics.Rendering.Chart.Axis.Types
-import Graphics.Rendering.Chart.Plot.Types
-import qualified Graphics.Rendering.Cairo as C
+import Graphics.Rendering.Chart
+import Data.Default
 
 import Data.Colour (opaque)
 import Data.Colour.Names (black, blue)
@@ -41,10 +41,13 @@ data PlotHist x y = PlotHist { _plot_hist_title                :: String
                              , _plot_hist_no_zeros             :: Bool
                              , _plot_hist_range                :: Maybe (x,x)
                              , _plot_hist_drop_lines           :: Bool
-                             , _plot_hist_fill_style           :: CairoFillStyle
-                             , _plot_hist_line_style           :: CairoLineStyle
+                             , _plot_hist_fill_style           :: FillStyle
+                             , _plot_hist_line_style           :: LineStyle
                              , _plot_hist_norm_func            :: Double -> Int -> y
                              }
+
+instance Default (PlotHist x Int) where
+    def = defaultPlotHist
 
 defaultPlotHist :: PlotHist x Int
 defaultPlotHist = PlotHist { _plot_hist_bins        = 20
@@ -64,16 +67,16 @@ defaultFloatPlotHist = defaultPlotHist { _plot_hist_norm_func = const realToFrac
 defaultNormedPlotHist :: PlotHist x Double
 defaultNormedPlotHist = defaultPlotHist { _plot_hist_norm_func = \n y->realToFrac y / n }
 
-defaultFillStyle :: CairoFillStyle
+defaultFillStyle :: FillStyle
 defaultFillStyle = solidFillStyle (opaque $ sRGB 0.5 0.5 1.0)
 
-defaultLineStyle :: CairoLineStyle
+defaultLineStyle :: LineStyle
 defaultLineStyle = (solidLine 1 $ opaque blue) {
-     _line_cap  = C.LineCapButt,
-     _line_join = C.LineJoinMiter
+     _line_cap  = LineCapButt,
+     _line_join = LineJoinMiter
  }
 
-histToPlot :: (RealFrac x, PlotValue y) => PlotHist x y -> Plot x y
+histToPlot :: (RealFrac x, Num y, Ord y) => PlotHist x y -> Plot x y
 histToPlot p = Plot {
         _plot_render      = renderPlotHist p,
         _plot_legend      = [(_plot_hist_title p, renderPlotLegendHist p)],
@@ -82,34 +85,44 @@ histToPlot p = Plot {
                             $ histToBins p
     }
 
-buildHistPath :: (RealFrac x, PlotValue y) => [((x,x), y)] -> [(x,y)]
-buildHistPath [] = []
-buildHistPath bins = (x1,fromValue 0):f bins
-    where ((x1,_),_) = head bins
-          f (((x1,x2),y):[])    = [(x1,y), (x2,y), (x2,fromValue 0)]
-          f (((x1,x2),y):bins)  = (x1,y):(x2,y):f bins
+buildHistPath :: (RealFrac x, Num y)
+              => PointMapFn x y -> [((x,x), y)] -> Path
+buildHistPath _ [] = End
+buildHistPath pmap bins = MoveTo (pt x0 0) (go bins)
+    where go [((x1,x2),y)]      = LineTo (pt x1 y)
+                                $ LineTo (pt x2 y)
+                                $ LineTo (pt x2 0)
+                                $ End
+          go (((x1,x2),y):rest) = LineTo (pt x1 y)
+                                $ LineTo (pt x2 y)
+                                $ go rest
+          ((x0,_),_) = head bins
+          pt x y = pmap (LValue x, LValue y)
 
-renderPlotHist :: (RealFrac x, PlotValue y) => PlotHist x y -> PointMapFn x y -> CRender ()
+renderPlotHist :: (RealFrac x, Num y, Ord y)
+               => PlotHist x y -> PointMapFn x y -> ChartBackend ()
 renderPlotHist p pmap
     | null bins = return ()
-    | otherwise = preserveCState $ do
-        setFillStyle (_plot_hist_fill_style p)
-        fillPath $ map (mapXY pmap) $ buildHistPath bins
-        setLineStyle (_plot_hist_line_style p)
-        when (_plot_hist_drop_lines p) $
-            mapM_ (\((x1,x2), y)->drawLines (mapXY pmap) [(x1,fromValue 0), (x1,y)])
-            $ tail bins
-        drawLines (mapXY pmap) $ buildHistPath bins
-    where drawLines mapfn pts = strokePath (map mapfn pts)
-          bins = histToBins p
+    | otherwise = do
+        withFillStyle (_plot_hist_fill_style p) $
+            alignFillPath (buildHistPath pmap bins) >>= fillPath
+        withLineStyle (_plot_hist_line_style p) $ do
+            when (_plot_hist_drop_lines p) $
+                alignStrokePath dropLinesPath >>= strokePath
+            alignStrokePath (buildHistPath pmap bins) >>= strokePath
+    where bins = histToBins p
+          pt x y = pmap (LValue x, LValue y)
+          dropLinesPath = F.foldMap (\((x1,_), y)->moveTo (pt x1 0)
+                                                <> lineTo (pt x1 y)
+                                    ) $ tail bins
 
-renderPlotLegendHist :: PlotHist x y -> Rect -> CRender ()
-renderPlotLegendHist p r@(Rect p1 p2) = preserveCState $ do
-    setLineStyle (_plot_hist_line_style p)
-    let y = (p_y p1 + p_y p2) / 2
-    strokePath [Point (p_x p1) y, Point (p_x p2) y]
+renderPlotLegendHist :: PlotHist x y -> Rect -> ChartBackend ()
+renderPlotLegendHist p r@(Rect p1 p2) =
+    withLineStyle (_plot_hist_line_style p) $
+        let y = (p_y p1 + p_y p2) / 2
+        in strokePath $ moveTo' (p_x p1) y <> lineTo' (p_x p2) y
 
-histToBins :: (RealFrac x, PlotValue y) => PlotHist x y -> [((x,x), y)]
+histToBins :: (RealFrac x, Num y, Ord y) => PlotHist x y -> [((x,x), y)]
 histToBins hist =
     filter_zeros $ zip bounds $ counts
     where n = _plot_hist_bins hist
@@ -117,7 +130,7 @@ histToBins hist =
           dx = realToFrac (b-a) / realToFrac n
           bounds = binBounds a b n
           values = _plot_hist_values hist
-          filter_zeros | _plot_hist_no_zeros hist  = filter (\(b,c)->c>fromValue 0)
+          filter_zeros | _plot_hist_no_zeros hist  = filter (\(b,c)->c > 0)
                        | otherwise                 = id
           norm = dx * realToFrac (V.length values)
           normalize = _plot_hist_norm_func hist $ norm
