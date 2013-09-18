@@ -26,7 +26,7 @@ import Data.Maybe (fromMaybe)
 import qualified Data.Foldable as F
 import qualified Data.Vector as V
 
-import Control.Lens
+import Control.Lens hiding (moveTo)
 import Graphics.Rendering.Chart
 import Data.Default
 
