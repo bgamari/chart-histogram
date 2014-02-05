@@ -15,9 +15,9 @@ chart = layout
                      $ plot_hist_bins  .~ 10
                      $ plot_hist_drop_lines .~ True
                      $ defaultPlotHist
-              layout :: Layout1 Double Int
-              layout = layout1_title .~ "Hello World"
-                     $ layout1_plots .~ [ Left (histToPlot hist) ]
+              layout :: Layout Double Int
+              layout = layout_title .~ "Hello World"
+                     $ layout_plots .~ [ histToPlot hist ]
                      $ def
 
 main = renderableToWindow (toRenderable chart) 640 480
