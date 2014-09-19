@@ -2,7 +2,7 @@
 
 module Graphics.Rendering.Chart.Plot.Histogram
   ( -- * Histograms
-    PlotHist
+    PlotHist (..)
   , histToPlot
   , defaultPlotHist
   , defaultFloatPlotHist
@@ -36,20 +36,41 @@ import Data.Colour.SRGB (sRGB)
 
 import Numeric.Histogram
 
-data PlotHist x y = PlotHist { _plot_hist_title                :: String
-                             , _plot_hist_bins                 :: Int
-                             , _plot_hist_values               :: V.Vector x
-                             , _plot_hist_no_zeros             :: Bool
-                             , _plot_hist_range                :: Maybe (x,x)
-                             , _plot_hist_drop_lines           :: Bool
-                             , _plot_hist_fill_style           :: FillStyle
-                             , _plot_hist_line_style           :: LineStyle
-                             , _plot_hist_norm_func            :: Double -> Int -> y
-                             }
+data PlotHist x y = PlotHist
+    { -- | Plot title
+      _plot_hist_title                :: String
+
+      -- | Number of bins
+    , _plot_hist_bins                 :: Int
+
+      -- | Values to histogram
+    , _plot_hist_values               :: V.Vector x
+
+      -- | Don't attempt to plot bins with zero counts. Useful when
+      -- the y-axis is logarithmically scaled.
+    , _plot_hist_no_zeros             :: Bool
+
+      -- | Override the range of the histogram. If @Nothing@ the
+      -- range of @_plot_hist_values@ is used
+    , _plot_hist_range                :: Maybe (x,x)
+
+      -- | Plot vertical lines between bins
+    , _plot_hist_drop_lines           :: Bool
+
+      -- | Fill style of the bins
+    , _plot_hist_fill_style           :: FillStyle
+
+      -- | Line style of the bin outlines
+    , _plot_hist_line_style           :: LineStyle
+
+      -- | Normalization function
+    , _plot_hist_norm_func            :: Double -> Int -> y
+    }
 
 instance Default (PlotHist x Int) where
     def = defaultPlotHist
 
+-- | The default style is an unnormalized histogram of 20 bins.
 defaultPlotHist :: PlotHist x Int
 defaultPlotHist = PlotHist { _plot_hist_bins        = 20
                            , _plot_hist_title       = ""
@@ -62,9 +83,12 @@ defaultPlotHist = PlotHist { _plot_hist_bins        = 20
                            , _plot_hist_norm_func   = const id
                            }
 
+-- | @defaultPlotHist@ but with real counts
 defaultFloatPlotHist :: PlotHist x Double
 defaultFloatPlotHist = defaultPlotHist { _plot_hist_norm_func = const realToFrac }
 
+-- | @defaultPlotHist@ but normalized such that the integral of the
+-- histogram is one.
 defaultNormedPlotHist :: PlotHist x Double
 defaultNormedPlotHist = defaultPlotHist { _plot_hist_norm_func = \n y->realToFrac y / n }
 
@@ -72,11 +96,12 @@ defaultFillStyle :: FillStyle
 defaultFillStyle = solidFillStyle (opaque $ sRGB 0.5 0.5 1.0)
 
 defaultLineStyle :: LineStyle
-defaultLineStyle = (solidLine 1 $ opaque blue) {
-     _line_cap  = LineCapButt,
-     _line_join = LineJoinMiter
- }
+defaultLineStyle = (solidLine 1 $ opaque blue)
+     { _line_cap  = LineCapButt
+     , _line_join = LineJoinMiter
+     }
 
+-- | Convert a @PlotHist@ to a @Plot@
 histToPlot :: (RealFrac x, Num y, Ord y) => PlotHist x y -> Plot x y
 histToPlot p = Plot {
         _plot_render      = renderPlotHist p,
