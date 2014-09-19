@@ -15,7 +15,6 @@ Library
   Exposed-modules:     Numeric.Histogram,
                        Graphics.Rendering.Chart.Plot.Histogram
 
-  -- Packages needed in order to build this package.
   Build-depends:       base,
                        vector,
                        Chart >= 1.0,
@@ -23,6 +22,3 @@ Library
                        colour,
                        data-default
 
-Executable Test
-  Main-is:             Test.hs
-  Build-depends:       Chart-gtk >= 1.0, lens
