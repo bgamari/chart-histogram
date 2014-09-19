@@ -15,10 +15,10 @@ Library
   Exposed-modules:     Numeric.Histogram,
                        Graphics.Rendering.Chart.Plot.Histogram
 
-  Build-depends:       base,
-                       vector,
-                       Chart >= 1.0,
-                       lens,
-                       colour,
-                       data-default
+  Build-depends:       base >=4.6 && <4.9,
+                       vector >=0.9 && <0.11,
+                       lens >=4.2 && <4.5,
+                       data-default >=0.5 && <0.6,
+                       colour >=2.3 && <2.4,
+                       Chart >=1.0 && <1.4
 
