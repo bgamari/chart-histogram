@@ -9,7 +9,11 @@ Maintainer:          bgamari.foss@gmail.com
 Copyright:           Ben Gamari 2013
 Category:            Graphics
 Build-type:          Simple
-Cabal-version:       >=1.2
+Cabal-version:       >=1.6
+
+Source-repository head
+  Location:            git@github.com:bgamari/chart-histogram
+  Type:                git
 
 Library
   Exposed-modules:     Numeric.Histogram,
