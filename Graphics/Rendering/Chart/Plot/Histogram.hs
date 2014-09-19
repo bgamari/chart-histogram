@@ -159,7 +159,7 @@ histToBins hist =
           filter_zeros | _plot_hist_no_zeros hist  = filter (\(b,c)->c > 0)
                        | otherwise                 = id
           norm = dx * realToFrac (V.length values)
-          normalize = _plot_hist_norm_func hist $ norm
+          normalize = _plot_hist_norm_func hist norm
           counts = V.toList $ V.map (normalize . snd)
                    $ histWithBins (V.fromList bounds) (zip (repeat 1) $ V.toList values)
 
