@@ -1,12 +1,12 @@
 Name:                chart-histogram
-Version:             0.4.1
+Version:             0.4.2
 Synopsis:            Easily render histograms with Chart
 Description:         A library for rendering histograms with the Chart library
 License:             BSD3
 License-file:        LICENSE
 Author:              Ben Gamari
 Maintainer:          bgamari.foss@gmail.com
-Copyright:           Ben Gamari 2013
+Copyright:           (c) 2014 Ben Gamari
 Category:            Graphics
 Build-type:          Simple
 Cabal-version:       >=1.6
