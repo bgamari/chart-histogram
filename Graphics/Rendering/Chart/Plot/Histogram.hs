@@ -102,6 +102,10 @@ defaultLineStyle = (solidLine 1 $ opaque blue)
      }
 
 -- | Convert a @PlotHist@ to a @Plot@
+--
+-- N.B. In principle this should be Chart's @ToPlot@ class but unfortunately
+-- this does not allow us to set bounds on the x and y axis types, hence
+-- the need for this function.
 histToPlot :: (RealFrac x, Num y, Ord y) => PlotHist x y -> Plot x y
 histToPlot p = Plot {
         _plot_render      = renderPlotHist p,
