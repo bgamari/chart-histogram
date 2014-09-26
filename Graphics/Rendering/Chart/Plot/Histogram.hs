@@ -28,7 +28,7 @@ import qualified Data.Vector as V
 
 import Control.Lens hiding (moveTo)
 import Graphics.Rendering.Chart
-import Data.Default
+import Data.Default.Class
 
 import Data.Colour (opaque)
 import Data.Colour.Names (black, blue)
