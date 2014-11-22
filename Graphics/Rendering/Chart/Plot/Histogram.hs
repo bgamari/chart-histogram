@@ -51,7 +51,10 @@ data PlotHist x y = PlotHist
     , _plot_hist_no_zeros             :: Bool
 
       -- | Override the range of the histogram. If @Nothing@ the
-      -- range of @_plot_hist_values@ is used
+      -- range of @_plot_hist_values@ is used.
+      -- 
+      -- Note that any normalization is always computed over the full
+      -- data set, including samples not falling in the histogram range.
     , _plot_hist_range                :: Maybe (x,x)
 
       -- | Plot vertical lines between bins
