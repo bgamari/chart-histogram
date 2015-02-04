@@ -1,5 +1,5 @@
 Name:                chart-histogram
-Version:             0.4.4
+Version:             0.4.5
 Synopsis:            Easily render histograms with Chart
 Description:         A library for rendering histograms with the Chart library
 License:             BSD3
